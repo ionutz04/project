@@ -1,13 +1,10 @@
-# PiCoScope - an Oscilloscope with capailities of an future machine :)
+# iScope - an Oscilloscope with oscilloscope with telephone clamps :)
 
 ---
 
-# i want to use an external lcd pannel with which i can show the actual wave form ... and another mcu with wireless capabilities ... like an ESP12F, or an Raspberry pi 4 to centralize the data and put them on grafana ... using prometheus.
-
-Here's a comprehensive plan for your oscilloscope project integrating an LCD, wireless data transmission, and Grafana visualization:
+The portable oscilloscope that can make your engineer life easyer 
 
 ---
-
 ### **System Architecture**
 
 ```
