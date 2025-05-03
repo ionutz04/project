@@ -1,204 +1,123 @@
-# iScope - an Oscilloscope with oscilloscope with telephone clamps :)
+# iScope
 
----
+**Author**: Ionescu Ionut 
+$\newline$ 
+**GitHub Project Link**: [https://github.com/ionutz04/project](https://github.com/ionutz04/project)
 
-The portable oscilloscope that can make your engineer life easyer 
+This project presents a miniaturized, dual-microcontroller oscilloscope system designed to address the limitations of traditional oscilloscope equipment through an accessible web interface.
 
----
-### **System Architecture**
+## Project Overview
+
+The iScope represents a significant departure from conventional oscilloscope technology, offering a compact and efficient alternative to traditional bulky instruments. By leveraging modern microcontroller capabilities, this project transforms signal analysis into a more accessible and user-friendly experience through a locally-hosted web interface.
+
+## Motivation and Significance
+
+Traditional oscilloscopes present several practical challenges for engineers, including their substantial size, complexity of operation, and limited portability. Based on professional engineering experience, these instruments often prove cumbersome in field applications and laboratory settings with space constraints. The iScope project addresses these limitations by:
+
+1. Miniaturizing the form factor while maintaining essential functionality
+2. Simplifying the user interface through web-based visualization
+3. Enhancing portability without sacrificing measurement capabilities
+4. Providing a more intuitive approach to waveform analysis
+
+This innovation represents a paradigm shift in oscilloscope design philosophy, prioritizing accessibility and efficiency.
+
+## System Architecture
+
+The iScope employs a distributed architecture consisting of three primary components:
+![alt text](iscope_diagram.webp)
+## Log
+
+<!-- write your progress here every week -->
+The logging of the projects starts way before the start of making an ideea on what the PM project  should look like, by means, from the start of the semester i have found it interesting to make an oscilloscope with an raspberry pi pico.
+### Phase 1: Research and Concept Development (March 1 - April 4)
+
+Initial research focused on fundamental oscilloscope principles, including:
+
+- ADC sampling methodologies
+- Full Width at Half Maximum (FWHM) algorithm implementation
+- Signal processing requirements for accurate waveform representation
+- Data extraction and transmission protocols
+
+
+### Phase 2: Communication Protocol Exploration (April 4-18)
+
+Investigation of data transmission methods revealed UART limitations for high-speed sampling applications. This led to exploration of alternative approaches:
+
+1. **Raspberry Pi 3 B+ Integration**: Initially considered as a Grafana host, but abandoned due to:
+    - Project constraints requiring exclusive use of microcontrollers
+    - Complexity of GPIO programming for SPI implementation
+
+### Phase 3: Alternative Communication Methods (April 18-21)
+
+2. **W5100 Ethernet Module Implementation**: Evaluated for high-bandwidth data transfer (100Mbps) but rejected due to:
+    - Similar constraints as the Raspberry Pi 3 approach
+    - Requirement for custom driver development with excessive complexity
+
+### Phase 4: Final Architecture Selection (April 21 - May 25)
+
+3. **Raspberry Pi Pico 2W Solution**: Selected as optimal approach, enabling:
+    - Direct web hosting capabilities
+    - Simplified user interface implementation
+    - Elimination of external computing requirements
+
+### Phase 5: Implementation and Testing (May 25 - May 2)
+
+- Acquisition of Raspberry Pi Pico 2W hardware
+- Web interface development and integration
+- System validation and performance testing
+
+
+## Hardware Components
+
+![rl picture 1](real1.webp)
+![rl picture 2](real2.webp)
+The iScope implementation utilizes a multi-microcontroller approach:
+
+1. **Raspberry Pi Pico (Debug Unit)**: Provides debugging capabilities and system monitoring
+2. **Raspberry Pi Pico (Primary Target)**: Performs analog signal acquisition and preliminary processing through:
+    - ADC signal sampling
+    - Implementation of FWHM algorithm on dedicated core
+    - Data preparation for transmission
+3. **Raspberry Pi Pico 2W (Secondary Target)**: Handles data reception and visualization through:
+    - Data reception from primary target
+    - Web server hosting
+    - User interface presentation
+
+### Schematics
+
+![iScope schematics](image.webp)
+
+### Bill of Materials
+
+<!-- Fill out this table with all the hardware components that you might need.
+
+The format is 
+```
+| [Device](link://to/device) | This is used ... | [price](link://to/store) |
 
 ```
-[Analog Signal] → [Pi Pico ADC] → [LCD Display (Local)]
-                          │
-                          └── [WiFi] → [ESP12F/RPi4] → [Prometheus] → [Grafana Dashboard]
-```
 
----
+-->
 
-### **Bill of Materials**
+| Device | Usage | Price |
+|--------|--------|-------|
+| [Raspberry Pi Pico 1](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html) | The microcontroller | [35 RON](https://www.optimusdigital.ro/en/raspberry-pi-boards/12024-raspberry-pi-pico-728886755172.html?search_query=raspberry+pi+pico+&results=36) |
+| [Raspberry Pi Pico 2](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html#pico-2-family) | The microcontroller | [35 RON](https://www.optimusdigital.ro/en/raspberry-pi-boards/13266-raspberry-pi-pico-2.html?search_query=raspberry+pi+pico+&results=36) |
+| [Raspberry Pi Pico 2W](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html#pico-2-family) | The microcontroller | [35 RON](https://www.optimusdigital.ro/en/raspberry-pi-boards/13327-raspberry-pi-pico-2-w.html?search_query=raspberry+pi+pico+2&results=36) |
 
-| **Component** | **Purpose** | **Source** |
+
+## Software
+
+| Library | Description | Usage |
 | :-- | :-- | :-- |
-| Raspberry Pi Pico | Signal sampling (ADC) | Core Component |
-| 16x2 LCD (I2C) | Local waveform display | Waveshare LCD1602 I2C[^1][^3] |
-| ESP12F Module | WiFi data transmission | IoT Server Projects[^4][^6] |
-| 10kΩ Resistors + Schottky Diodes | Input voltage protection | Oscilloscope Safety [Previous Chat] |
-| USB OTG Adapter | Connect Pico to mobile for Scoppy app | Previous Chat |
-| Raspberry Pi 4 (Alternative) | Central Prometheus/Grafana server | Grafana Cloud Guide[^5][^7] |
+| [embassy-time](https://github.com/embassy-rs/embassy) | Timekeeping, delays and timeouts for embedded async applications | Used for syncronisation and chrono stuff |
+| [embassy-usb](https://github.com/embassy-rs/embassy) | Async USB device stack for embedded devices with support for various USB classes |  Used for uploading the rust core code on MCUs |
+| [embassy-net](https://github.com/embassy-rs/embassy) | Async network stack for embedded systems with TCP, UDP, DHCP, and DNS support | For configuring the website service on Pico 2w MCU ||
+| [cyw43](https://github.com/embassy-rs/embassy) | Driver for Cypress CYW43xx WiFi chips used in Raspberry Pi Pico W | Wifi chipset firmware for configuration of websocket |
+|[picoserve](https://github.com/sammhicks/picoserve)| An async no_std HTTP server suitable for bare-metal environments, heavily inspired by axum | Used in creation of the http part of the website |
+## Links
 
----
+<!-- Add a few links that inspired you and that you think you will use for your project -->
 
-### **Software Stack**
-
-1. **Pi Pico (Rust)**
-    - `embassy-rp`: ADC sampling \& timing
-    - `cristiancristea00/Pico-I2C-LCD`: LCD control[^2]
-    - `esp-wifi` (ESP12F): WiFi connectivity
-2. **Central Server**
-    - Prometheus: Time-series data storage
-    - Grafana: Visualization dashboard[^5][^7]
-    - Docker: Containerized deployment[^7]
-
----
-
-### **Key Implementation Steps**
-
-1. **Local Display (Pi Pico + LCD)**
-```rust
-// Example LCD initialization
-let i2c = I2C::new(peripherals.I2C0, sda_pin, scl_pin, 400.kHz());
-let mut lcd = Lcd::new(i2c, 0x27); // Common I2C address
-
-lcd.print("Sampling...").await;
-```
-
-2. **Wireless Transmission (ESP12F)**
-    - Configure ESP12F as Prometheus target:
-```bash
-# Prometheus scrape config (prometheus.yml)
-scrape_configs:
-  - job_name: 'pico_oscilloscope'
-    static_configs:
-      - targets: ['192.168.1.100:80'] # ESP12F IP
-```
-
-3. **Grafana Dashboard Setup**
-    - Use pre-built dashboard template:
-```json
-{
-  "title": "Pico Oscilloscope",
-  "panels": [
-    {
-      "type": "graph",
-      "targets": [{
-        "expr": "pico_voltage",
-        "legendFormat": "{{instance}}"
-      }]
-    }
-  ]
-}
-```
-
----
-
-### **Performance Considerations**
-
-| **Parameter** | **Pi Pico** | **ESP12F** |
-| :-- | :-- | :-- |
-| Sampling Rate | 500 kSPS (max) | 10 Hz (safe WiFi) |
-| Voltage Range | 0-3.3V | 3.3V logic |
-| Power Consumption | 50 mA | 80 mA (TX burst) |
-
----
-
-### **Alternative Architecture for Higher Fidelity**
-
-```
-[Pico ADC] → [RPi4 USB] → [Prometheus]
-                │
-                └── [HDMI] → Dedicated Monitor
-```
-
-*Benefits:*
-
-- Higher sampling rates (USB 2.0 → 480 Mbps)
-- Direct HDMI output for detailed waveforms
-- Native Docker support for monitoring stack[^7]
-
----
-
-### **Troubleshooting Tips**
-
-1. **LCD Not Initializing**
-    - Verify I2C address with `i2cdetect`
-    - Check 3.3V power supply[^3]
-2. **Prometheus Scrape Failures**
-```bash
-# Debug target status
-curl http://esp12f-ip/metrics
-```
-
-3. **WiFi Packet Loss**
-    - Reduce sampling rate < 15 Hz
-    - Use QoS-enabled router
-
-This integration combines real-time local visualization with cloud-based monitoring. Start with LCD implementation[^2][^3], then add WiFi transmission[^4][^6], finally deploy monitoring stack[^5][^7].
-
-<div style="text-align: center">⁂</div>
-
-[^1]: https://www.youtube.com/watch?v=UJjAryNI9fs
-
-[^2]: https://github.com/cristiancristea00/Pico-I2C-LCD
-
-[^3]: https://www.circuitschools.com/interfacing-16x2-lcd-module-with-raspberry-pi-pico-with-and-without-i2c/
-
-[^4]: https://dev.hackster.io/electrofunsmart/iot-server-with-prometheus-and-grafana-monitoring-a-esp8266-9e0661
-
-[^5]: https://grafana.com/blog/2021/01/26/how-to-connect-and-monitor-your-raspberry-pi-with-grafana-cloud/
-
-[^6]: https://www.hackster.io/electrofunsmart/iot-server-with-prometheus-and-grafana-monitoring-a-esp8266-9e0661
-
-[^7]: https://betterstack.com/community/guides/monitoring/visualize-prometheus-metrics-grafana/
-
-[^8]: https://signoz.io/guides/how-to-install-prometheus-and-grafana-on-docker/
-
-[^9]: https://prometheus.io/docs/visualization/grafana/
-
-[^10]: https://grafana.com/docs/grafana/latest/getting-started/get-started-grafana-prometheus/
-
-[^11]: https://www.instructables.com/Raspberry-Pi-Pico-and-16x2-LCD/
-
-[^12]: https://www.waveshare.com/wiki/Pico-LCD-2
-
-[^13]: https://william.robb.scot/2020/01/25/current-monitoring-with-esp8266.html
-
-[^14]: https://www.reddit.com/r/homeassistant/comments/vwi65w/air_quality_monitors_plug_and_play_or_diy/
-
-[^15]: https://grafana.com/blog/2021/07/19/iot-at-your-home-work-or-data-center-with-prometheus-metrics-and-grafana-cloud/
-
-[^16]: https://forums.raspberrypi.com/viewtopic.php?t=337732
-
-[^17]: https://grafana.com/go/explore-prometheus-with-easy-hello-world-projects/
-
-[^18]: https://www.linkedin.com/pulse/how-install-configure-prometheus-grafana-node-aravindhan-jayaraman
-
-[^19]: https://grafana.com/docs/grafana/latest/fundamentals/intro-to-prometheus/
-
-[^20]: https://www.digitalocean.com/community/tutorials/how-to-add-a-prometheus-dashboard-to-grafana
-
-[^21]: https://prometheus.io/docs/tutorials/visualizing_metrics_using_grafana/
-
-[^22]: https://forum.micropython.org/viewtopic.php?t=11639
-
-[^23]: https://github.com/martinkooij/pi-pico-LCD
-
-[^24]: https://how2electronics.com/interfacing-16x2-lcd-display-with-raspberry-pi-pico/
-
-[^25]: https://www.waveshare.com/wiki/Pico-LCD-1.14
-
-[^26]: https://www.reddit.com/r/raspberry_pi/comments/l62k32/picolcd_a_c_library_for_using_lcd_screens_with/
-
-[^27]: https://www.instructables.com/IOT-Server-With-Prometheus-and-Grafana-Monitoring-/
-
-[^28]: https://www.reddit.com/r/grafana/comments/rtkcza/grafana_prometheus_monitoring_on_a_cluster/
-
-[^29]: https://www.alibabacloud.com/blog/observability-|-best-practices-for-centralized-data-management-of-multiple-prometheus-instances_601178
-
-[^30]: https://linux.xvx.cz/2022/01/monitor-your-raspberry-pi-using-grafana.html
-
-[^31]: https://blog.devops.dev/how-i-built-a-smart-home-monitoring-system-with-mqtt-go-prometheus-and-grafana-1fd91521baf8
-
-[^32]: https://www.tomshardware.com/how-to/lcd-display-raspberry-pi-pico
-
-[^33]: https://lib.rs/crates/lcd1602rgb-rs
-
-[^34]: https://randomnerdtutorials.com/raspberry-pi-pico-i2c-lcd-display-micropython/
-
-[^35]: https://github.com/joaocarvalhoopen/Raspberry_Pi_Pico_in_Rust__Proj_Template_with_RTIC_USB-Serial_UF2
-
-[^36]: https://www.alexdwilson.dev/learning-in-public/creating-an-lcd-menu-pt1-how-to-program-a-raspberry-pi-with-rust
-
-[^37]: https://www.youtube.com/watch?v=liwMc01LOIA
-
-[^38]: https://www.youtube.com/watch?v=pGSkPutCKtQ
-
+1. [Raspberry Pi Pico 200Khz Digital Oscilloscope](https://www.instructables.com/Raspberry-Pi-Pico-200Khz-Digital-Oscilloscope/)
+2. [Raspberry pi forum about creation of an Oscilloscope with an MCU](https://forums.raspberrypi.com/viewtopic.php?t=365757)
